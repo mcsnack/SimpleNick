@@ -1,22 +1,24 @@
 name: SimpleNick
-version: '1.0.0'
+version: '2.0.0'
 main: de.mcsnack.simplenick.SimpleNick
 api-version: '26.3'
-description: Lightweight OP-only nickname commands
+description: OP-only nicknames and colored group prefixes
 commands:
   nick:
-    description: Set a nickname for an online player
     usage: /nick <player> <nickname>
     permission: simplenick.admin
   unnick:
-    description: Remove a nickname
     usage: /unnick <player>
     permission: simplenick.admin
   nicklist:
-    description: List active nicknames
     usage: /nicklist
+    permission: simplenick.admin
+  group:
+    usage: /group <player> <group> <color>
+    permission: simplenick.admin
+  ungroup:
+    usage: /ungroup <player>
     permission: simplenick.admin
 permissions:
   simplenick.admin:
-    description: Allows nickname administration
     default: op
