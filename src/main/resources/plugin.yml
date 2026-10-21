@@ -1,5 +1,5 @@
 name: SimpleNick
-version: '2.0.0'
+version: '2.1.0'
 main: de.mcsnack.simplenick.SimpleNick
 api-version: '26.3'
 description: OP-only nicknames and colored group prefixes
