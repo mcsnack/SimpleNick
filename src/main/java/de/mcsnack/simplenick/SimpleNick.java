@@ -55,10 +55,12 @@ public final class SimpleNick extends JavaPlugin implements Listener, CommandExe
     }
 
     private Component label(Player player) {
-        Component base = Component.text(names.getOrDefault(player.getUniqueId(), player.getName()));
+        Component base = Component.text(names.getOrDefault(player.getUniqueId(), player.getName()), NamedTextColor.WHITE);
         Group group = groups.get(player.getUniqueId());
-        return group == null ? base : Component.text("[" + group.name() + "]", group.color())
-            .append(Component.space()).append(base);
+        return group == null ? base : Component.text("[", NamedTextColor.WHITE)
+            .append(Component.text(group.name(), group.color()))
+            .append(Component.text("] ", NamedTextColor.WHITE))
+            .append(base);
     }
 
     private void apply(Player player) {
