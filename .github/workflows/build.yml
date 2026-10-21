@@ -32,5 +32,5 @@ jobs:
           fi
       - uses: actions/upload-artifact@v4
         with:
-          name: SimpleNick-2.0.0
+          name: SimpleNick-2.1.0
           path: build/libs/*.jar
