@@ -1,5 +1,5 @@
 name: SimpleNick
-version: '2.1.0'
+version: '2.2.0'
 main: de.mcsnack.simplenick.SimpleNick
 api-version: '26.3'
 description: OP-only nicknames and colored group prefixes
@@ -14,11 +14,9 @@ commands:
     usage: /nicklist
     permission: simplenick.admin
   group:
-    usage: /group <player> <group> <color>
-    permission: simplenick.admin
+    usage: /group [player] <group> <color>
   ungroup:
-    usage: /ungroup <player>
-    permission: simplenick.admin
+    usage: /ungroup [player]
 permissions:
   simplenick.admin:
     default: op
