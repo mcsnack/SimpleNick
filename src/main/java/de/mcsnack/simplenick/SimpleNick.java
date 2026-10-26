@@ -92,8 +92,11 @@ public final class SimpleNick extends JavaPlugin implements Listener, CommandExe
     }
 
     @Override public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
-        if (!sender.isOp()) { sender.sendMessage("Only operators can use this command."); return true; }
         String action = command.getName().toLowerCase(Locale.ROOT);
+        boolean isGroup = action.equals("group") || action.equals("ungroup");
+        if (!isGroup && !sender.isOp()) {
+            sender.sendMessage("Only operators can use this command."); return true;
+        }
         if (action.equals("nicklist")) {
             if (names.isEmpty()) sender.sendMessage("No active nicknames.");
             else names.forEach((id, nick) -> {
@@ -102,10 +105,30 @@ public final class SimpleNick extends JavaPlugin implements Listener, CommandExe
             });
             return true;
         }
-        int required = switch (action) { case "nick" -> 2; case "group" -> 3; default -> 1; };
-        if (args.length < required) { sender.sendMessage("Usage: " + command.getUsage()); return true; }
-        Player target = Bukkit.getPlayerExact(args[0]);
-        if (target == null) { sender.sendMessage("Player must be online; use their real username."); return true; }
+
+        Player target;
+        int offset;
+        if (isGroup && ((action.equals("group") && args.length == 2)
+                || (action.equals("ungroup") && args.length == 0))) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage("Console must specify a player."); return true;
+            }
+            target = player;
+            offset = 0;
+        } else {
+            int required = switch (action) { case "nick" -> 2; case "group" -> 3; default -> 1; };
+            if (args.length < required) {
+                sender.sendMessage("Usage: " + command.getUsage()); return true;
+            }
+            if (isGroup && !sender.isOp()) {
+                sender.sendMessage("Only operators can change other players' groups."); return true;
+            }
+            target = Bukkit.getPlayerExact(args[0]);
+            if (target == null) {
+                sender.sendMessage("Player must be online; use their real username."); return true;
+            }
+            offset = 1;
+        }
         UUID id = target.getUniqueId();
         switch (action) {
             case "nick" -> {
@@ -118,11 +141,11 @@ public final class SimpleNick extends JavaPlugin implements Listener, CommandExe
             }
             case "unnick" -> { names.remove(id); sender.sendMessage("Nickname removed."); }
             case "group" -> {
-                String groupName = args[1];
+                String groupName = args[offset];
                 if (!groupName.matches("[A-Za-z0-9_]{1,8}")) {
                     sender.sendMessage("Group must be 1-8 letters, numbers or underscores."); return true;
                 }
-                NamedTextColor color = COLORS.get(args[2].toLowerCase(Locale.ROOT));
+                NamedTextColor color = COLORS.get(args[offset + 1].toLowerCase(Locale.ROOT));
                 if (color == null) {
                     sender.sendMessage("Unknown color. Use TAB to see the 16 standard colors."); return true;
                 }
@@ -138,14 +161,23 @@ public final class SimpleNick extends JavaPlugin implements Listener, CommandExe
     }
 
     @Override public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (!sender.isOp()) return List.of();
         String action = command.getName().toLowerCase(Locale.ROOT);
         if (action.equals("nicklist")) return List.of();
-        if (action.equals("group") && args.length == 3) return filter(COLORS.keySet(), args[2]);
-        if (args.length != 1) return List.of();
+        if (action.equals("group")) {
+            if (args.length == 2 && !sender.isOp()) return filter(COLORS.keySet(), args[1]);
+            if (args.length == 3 && sender.isOp()) return filter(COLORS.keySet(), args[2]);
+            if (args.length == 1 && sender.isOp())
+                return filter(Bukkit.getOnlinePlayers().stream().map(Player::getName).toList(), args[0]);
+            return List.of();
+        }
+        if (action.equals("ungroup")) {
+            if (!sender.isOp() || args.length != 1) return List.of();
+            return filter(Bukkit.getOnlinePlayers().stream()
+                .filter(p -> groups.containsKey(p.getUniqueId())).map(Player::getName).toList(), args[0]);
+        }
+        if (!sender.isOp() || args.length != 1) return List.of();
         return filter(Bukkit.getOnlinePlayers().stream()
             .filter(p -> !action.equals("unnick") || names.containsKey(p.getUniqueId()))
-            .filter(p -> !action.equals("ungroup") || groups.containsKey(p.getUniqueId()))
             .map(Player::getName).toList(), args[0]);
     }
 
