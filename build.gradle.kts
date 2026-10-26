@@ -1,6 +1,6 @@
 plugins { java }
 group = "de.mcsnack.simplenick"
-version = "2.1.0"
+version = "2.2.0"
 repositories { maven("https://repo.papermc.io/repository/maven-public/") }
 dependencies { compileOnly("io.papermc.paper:paper-api:26.3.build.+") }
 java { toolchain.languageVersion.set(JavaLanguageVersion.of(25)) }
